@@ -1,0 +1,1 @@
+# Bitwarden Secret Provider
