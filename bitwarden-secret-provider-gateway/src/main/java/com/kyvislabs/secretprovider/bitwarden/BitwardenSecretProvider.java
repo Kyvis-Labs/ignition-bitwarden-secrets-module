@@ -11,24 +11,6 @@ import java.io.IOException;
 import java.util.*;
 import java.io.File;
 
-/**
- * An example implementation of a Secret Provider that uses MongoDB as the backend data store.
- * <p>
- * This class demonstrates how to implement the {@link SecretProvider} interface and manage secrets
- * stored in a MongoDB database. It supports listing secrets and reading individual secrets by name.
- * <p>
- * The secrets are stored in a MongoDB collection named "secrets", where each document contains
- * a "name" field for the secret name and a "ciphertext" field for the encrypted secret value. The encrypted
- * secret value is stored as a JSON-encoded object, which is decrypted using Ignition's
- * {@link SystemEncryptionService} when reading the secret. The {@link SystemEncryptionService} should also
- * be used to populate the document when writing secrets to the database, which must be done externally at this
- * time.
- * <p>
- * The class also implements the {@link Lifecycle} interface, allowing it to manage its own lifecycle
- * and resources via the startup and shutdown methods. It's an optional interface to implement, so
- * only do so if you need to manage resources explicitly. In this case, the MongoDB client is created
- * when the provider is first used and remains open for the lifetime of the provider.
- */
 public class BitwardenSecretProvider implements SecretProvider, Lifecycle {
 
     BitwardenSettings bitwardenSettings = new BitwardenSettings();
@@ -39,7 +21,7 @@ public class BitwardenSecretProvider implements SecretProvider, Lifecycle {
     private final BitwardenSecretProviderResource settings;
 
     /**
-     * Constructor for the MongoDbSecretProvider.
+     * Constructor for the BitwardenSecretProvider.
      *
      * @param context  the {@link SecretProviderContext} encapsulating the contextual information needed for creating
      *                 new {@link SecretProvider} instances of this type.
@@ -54,8 +36,8 @@ public class BitwardenSecretProvider implements SecretProvider, Lifecycle {
     @Override
     public void startup() {
 
-        bitwardenSettings.setApiUrl("https://api.bitwarden.com");
-        bitwardenSettings.setIdentityUrl("https://identity.bitwarden.com");
+        bitwardenSettings.setApiUrl(settings.apiUrl());
+        bitwardenSettings.setIdentityUrl(settings.identityUrl());
         bitwardenClient = new BitwardenClient(bitwardenSettings);
 
         try (Plaintext plainText = Secret.create(context.getGatewayContext(), settings.accessToken()).getPlaintext()){
